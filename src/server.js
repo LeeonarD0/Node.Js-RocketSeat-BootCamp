@@ -1,31 +1,33 @@
 
 import http from 'http'
+import { json } from './middlewares/json.js'
+import { routes } from './routes.js'
 
-const users = []
+// QUER PARAMETERS:
+// ROUTE PARAMETERS: 
+// REQUEST PARAMETERS: 
 
-const server = http.createServer((req, res) => {
+//
 
-    const {method, url } = req
+const server = http.createServer(async (req, res) => {
+
+    const { method, url } = req
     
-    if (method === 'GET' && url === '/users') {
-       return res
-       .setHeader('Content-type', 'application/json')
-       .end(JSON.stringify(users))
+    await json(req, res)
+
+    const route = routes.find((route) => {
+        return route.method === method && route.path === url
+    })
+
+    if (route) {
+        return route.handler(req , res)
     }
 
-    if (method === 'POST' && url === '/users') {
-        users.push({
-            id: 1,
-            name: 'Leonardo',
-            email: 'dasda@gmail.com'
-        })
+    console.log(route)
 
-        return res.writeHead(201).end()
-        
-    }
-
-    return res.end('Hello World!')
+   
+    return res.writeHead('404').end()
 
 })
- 
+
 server.listen(3333)
